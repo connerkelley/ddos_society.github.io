@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>// PROJECT: BLACKOUT - DATA POISONING PROTOCOL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- MOBILE APP OPTIMIZATION METAS -->
+    <meta name="theme-color" content="#050505">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>DDoS_Society</title>
     <style>
         :root {
             --terminal-green: #39ff14;
@@ -19,6 +23,7 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            -webkit-tap-highlight-color: rgba(255, 0, 60, 0.1); /* Red flash on mobile tap */
         }
 
         body {
@@ -31,6 +36,7 @@
             padding-top: 60px; /* Space for fixed nav */
             position: relative;
             z-index: 0;
+            touch-action: manipulation; /* Removes 300ms click delay on mobile */
         }
 
         /* --- CRT SCANLINES OVERLAY --- */
@@ -83,6 +89,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 60px;
         }
 
         nav .logo {
@@ -92,6 +99,7 @@
             text-transform: uppercase;
         }
 
+        /* Desktop Nav */
         nav ul {
             list-style: none;
             display: flex;
@@ -114,6 +122,18 @@
             text-shadow: 0 0 5px var(--alert-red);
         }
 
+        /* Mobile Hamburger Menu */
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--terminal-green);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        /* --- RESPONSIVE CONTAINER --- */
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -131,23 +151,26 @@
         }
 
         h1 {
-            font-size: 2.5rem;
+            font-size: 2rem; /* Slightly smaller for mobile */
             border-bottom: 2px solid var(--alert-red);
             padding-bottom: 10px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
+            word-wrap: break-word;
         }
 
         h2 {
             color: var(--alert-red);
             border-left: 5px solid var(--alert-red);
             padding-left: 15px;
-            margin-top: 20px; 
+            margin-top: 40px; 
             text-shadow: 0 0 5px var(--alert-red);
+            font-size: 1.5rem;
         }
 
         p {
             margin-bottom: 15px;
-            max-width: 800px;
+            font-size: 1.05rem; /* Slightly larger text for readability */
+            line-height: 1.5;
         }
 
         .cursor {
@@ -164,29 +187,27 @@
             50% { opacity: 0; }
         }
 
-        /* --- COMPONENTS --- */
+        /* --- BUTTONS (Optimized for Touch) --- */
         .btn {
             display: inline-block;
             background: transparent;
             border: 2px solid var(--terminal-green);
             color: var(--terminal-green);
-            padding: 15px 30px;
+            padding: 18px 24px; /* Larger padding for thumbs */
             font-family: var(--font-stack);
-            font-size: 1.1rem;
+            font-size: 1rem; /* Readable size */
             text-transform: uppercase;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             margin: 10px 5px 10px 0;
             text-decoration: none;
             position: relative;
             overflow: hidden;
             z-index: 11; 
-        }
-
-        .btn:hover {
-            background-color: var(--terminal-green);
-            color: var(--bg-black);
-            box-shadow: 0 0 15px var(--terminal-green);
+            width: 100%; /* Full width buttons on mobile */
+            text-align: center;
+            box-sizing: border-box;
+            margin-bottom: 15px;
         }
 
         .btn-alert {
@@ -194,22 +215,21 @@
             color: var(--alert-red);
         }
 
-        .btn-alert:hover {
+        .btn-alert:active, .btn:active {
             background-color: var(--alert-red);
             color: var(--bg-black);
-            box-shadow: 0 0 15px var(--alert-red);
         }
 
         .btn-sm {
-            padding: 8px 16px;
-            font-size: 0.8rem;
+            padding: 12px 16px;
+            font-size: 0.9rem;
             margin-top: 15px;
         }
 
         /* --- GRID LAYOUTS --- */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
             gap: 20px;
             margin-top: 30px;
         }
@@ -232,7 +252,7 @@
 
         .card h3 {
             color: var(--terminal-green);
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             border-bottom: 1px dashed var(--terminal-dim);
             padding-bottom: 5px;
         }
@@ -241,6 +261,7 @@
             list-style: square inside;
             margin-top: 15px;
             color: #ccc;
+            font-size: 0.9rem;
         }
 
         .card li {
@@ -251,11 +272,11 @@
         #poison-terminal {
             background: #000;
             border: 2px solid var(--alert-red);
-            padding: 20px;
+            padding: 15px;
             margin-bottom: 20px;
-            height: 200px;
+            height: 250px; /* Taller on mobile for readability */
             overflow-y: auto;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             white-space: pre-wrap;
             box-shadow: inset 0 0 20px rgba(255, 0, 60, 0.2);
         }
@@ -268,6 +289,7 @@
             margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
+            font-size: 0.8rem;
         }
 
         /* --- MODAL / PAGE OVERLAY --- */
@@ -280,17 +302,16 @@
             width: 100%;
             height: 100%;
             background-color: rgba(0,0,0,0.95);
-            border: 5px solid var(--alert-red);
             overflow-y: auto;
-            padding-top: 60px;
+            padding-top: 60px; /* Offset for Nav */
         }
 
         .modal-content {
             background-color: var(--bg-black);
-            margin: 40px auto;
-            padding: 40px;
+            margin: 20px auto;
+            padding: 25px;
             border: 2px solid var(--terminal-green);
-            width: 80%;
+            width: 95%;
             max-width: 900px;
             position: relative;
             box-shadow: 0 0 30px var(--terminal-green);
@@ -298,30 +319,48 @@
 
         .close-btn {
             position: absolute;
-            top: 10px;
-            right: 20px;
+            top: 5px;
+            right: 15px;
             color: var(--alert-red);
             font-size: 40px;
             font-weight: bold;
             cursor: pointer;
             z-index: 3001;
-        }
-
-        .close-btn:hover {
-            color: var(--terminal-green);
+            padding: 10px;
         }
 
         .modal-header {
             border-bottom: 2px solid var(--alert-red);
             padding-bottom: 20px;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
         }
 
-        /* --- MODAL NAVIGATION STYLES --- */
+        /* --- MOBILE NAVIGATION MENU --- */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 60px; /* Below nav */
+            left: 0;
+            width: 100%;
+            background: var(--bg-black);
+            border-bottom: 2px solid var(--alert-red);
+            z-index: 1999;
+            flex-direction: column;
+            padding: 20px;
+            gap: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.8);
+        }
+
+        .mobile-menu a {
+            font-size: 1.2rem;
+            display: block;
+            width: 100%;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--terminal-dim);
+        }
+
         .modal-nav {
             list-style: none;
-            display: flex;
-            gap: 20px;
             margin-top: 15px;
             border-top: 1px dashed var(--terminal-dim);
             padding-top: 15px;
@@ -331,20 +370,16 @@
             text-decoration: none;
             color: var(--terminal-green);
             font-weight: bold;
-            font-size: 0.9rem;
+            font-size: 1rem;
             text-transform: uppercase;
-        }
-
-        .modal-nav a:hover {
-            color: var(--alert-red);
-            text-shadow: 0 0 5px var(--alert-red);
-            background-color: #111;
-            padding: 2px 5px;
+            display: block;
+            padding: 10px 0;
         }
 
         .modal-body h3 {
             color: var(--alert-red);
-            margin-top: 30px;
+            margin-top: 25px;
+            font-size: 1.3rem;
         }
         
         .code-block {
@@ -354,27 +389,41 @@
             margin: 15px 0;
             font-family: monospace;
             color: #ccc;
+            font-size: 0.85rem;
+            overflow-x: auto;
         }
 
         /* --- FOOTER --- */
         footer {
-            margin-top: 80px;
+            margin-top: 60px;
             border-top: 1px solid var(--alert-red);
-            padding: 40px 0;
+            padding: 30px 0;
             text-align: center;
             font-size: 0.8rem;
             color: var(--terminal-dim);
             padding-bottom: 80px;
         }
 
-        /* --- RESPONSIVE --- */
+        /* --- RESPONSIVE MEDIA QUERIES --- */
+        @media (min-width: 769px) {
+            .btn { width: auto; } /* Revert button width on desktop */
+            h1 { font-size: 2.5rem; }
+        }
+
         @media (max-width: 768px) {
-            h1 { font-size: 1.8rem; }
-            h2 { font-size: 1.4rem; }
-            .grid { grid-template-columns: 1fr; }
-            nav ul { display: none; } 
-            .modal-content { width: 95%; margin: 20px auto; padding: 20px; }
-            .modal-nav { flex-direction: column; gap: 10px; }
+            nav ul { display: none; } /* Hide Desktop Nav */
+            .menu-toggle { display: block; } /* Show Hamburger */
+            
+            .grid { grid-template-columns: 1fr; } /* Stack Cards */
+            
+            .modal-content { width: 100%; margin: 0; border: none; height: 100%; }
+            .modal { padding-top: 0; }
+            .close-btn { top: 10px; right: 20px; }
+
+            /* Mobile Menu Active State */
+            .mobile-menu.active {
+                display: flex;
+            }
         }
     </style>
 </head>
@@ -386,13 +435,26 @@
     <!-- NAVIGATION BAR -->
     <nav>
         <div class="logo">DDoS_Society <span class="cursor"></span></div>
+        
+        <!-- Desktop Nav -->
         <ul>
             <li><a href="#" onclick="closeAllModals()">HOME</a></li>
             <li><a href="#hardware" onclick="closeAllModals()">HARDWARE</a></li>
             <li><a href="#communication" onclick="closeAllModals()">COMMS</a></li>
             <li><a href="#networks" onclick="closeAllModals()">NETWORKS</a></li>
         </ul>
+
+        <!-- Mobile Menu Button -->
+        <button class="menu-toggle" onclick="toggleMenu()">☰</button>
     </nav>
+
+    <!-- Mobile Menu Dropdown -->
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="#" onclick="closeAllModals(); toggleMenu()">HOME</a>
+        <a href="#hardware" onclick="closeAllModals(); toggleMenu()">HARDWARE</a>
+        <a href="#communication" onclick="closeAllModals(); toggleMenu()">COMMS</a>
+        <a href="#networks" onclick="closeAllModals(); toggleMenu()">NETWORKS</a>
+    </div>
 
     <!-- MODAL (DYNAMIC PAGE LOADER) -->
     <div id="dataModal" class="modal">
@@ -416,11 +478,10 @@
             <section>
                 <h2>// 1. THE THREAT</h2>
                 <p>The algorithms track you. YouTube, TikTok, Google—they construct a psychological profile to predict and control your behavior. The "Doomsday" of privacy is already here. To survive, we must become noise. We must poison the data well.</p>
-                <p>The objective is to confuse the Artificial Intelligence. By injecting erratic, nonsensical, and contradictory search queries into their systems, we degrade the accuracy of their predictive models. Protect yourself. Hide in the noise.</p>
                 
                 <div style="margin-top: 40px; border: 1px solid var(--terminal-green); padding: 20px;">
                     <h3 style="margin-top: 0;">> DATA_POISONING_MODULE.EXE</h3>
-                    <p>Execute the script below. Copy these 250 randomized search queries and run them in your tracked browsers to break the algorithmic link.</p>
+                    <p>Execute the script below to confuse the AI.</p>
                     
                     <div class="status-bar">
                         <span>TERMINAL_OUTPUT</span>
@@ -438,16 +499,15 @@
             <!-- HARDWARE & OS -->
             <section id="hardware">
                 <h2>// 2. HARDWARE & OPERATING SYSTEMS</h2>
-                <p>Mainstream operating systems are surveillance backdoors. You must migrate to hardened, open-source environments.</p>
                 
                 <div class="grid">
                     <article class="card">
                         <div>
                             <h3>GRAPHENE OS</h3>
-                            <p>The mobile privacy frontier. A security and privacy focused mobile OS with Android app compatibility developed outside of Google.</p>
+                            <p>Mobile privacy frontier. Android app compatibility developed outside of Google.</p>
                             <ul>
-                                <li>Recommendation: Pixel 6a, 7, or 8 Pro.</li>
-                                <li>Features: Sandboxed Google Play, hardened memory allocator.</li>
+                                <li>Pixel 6a, 7, 8 Pro.</li>
+                                <li>Sandboxed Google Play.</li>
                             </ul>
                         </div>
                         <button class="btn btn-sm" onclick="openPage('graphene')">[ACCESS DATA]</button>
@@ -456,10 +516,10 @@
                     <article class="card">
                         <div>
                             <h3>TAILS OS</h3>
-                            <p>The Amnesic Incognito Live System. Routes traffic through Tor and leaves no trace on the machine.</p>
+                            <p>Amnesic Incognito Live System. Routes traffic through Tor. Leaves no trace.</p>
                             <ul>
-                                <li>Usage: Boot from USB stick.</li>
-                                <li>Ideal for: Whistleblowers, journalists, sensitive research.</li>
+                                <li>Boot from USB stick.</li>
+                                <li>For whistleblowers.</li>
                             </ul>
                         </div>
                         <button class="btn btn-sm" onclick="openPage('tails')">[ACCESS DATA]</button>
@@ -468,10 +528,10 @@
                     <article class="card">
                         <div>
                             <h3>QUBES OS</h3>
-                            <p>Reasonable security for the paranoid. Uses Xen hypervisor to run security domains (qubes) isolated from each other.</p>
+                            <p>Reasonable security for the paranoid. Xen hypervisor isolates security domains.</p>
                             <ul>
-                                <li>Hardware Req: ThinkPad (Recommended)</li>
-                                <li>Architecture: "Security by Compartmentalization".</li>
+                                <li>ThinkPad Recommended.</li>
+                                <li>Compartmentalization.</li>
                             </ul>
                         </div>
                         <button class="btn btn-sm" onclick="openPage('qubes')">[ACCESS DATA]</button>
@@ -480,10 +540,10 @@
                     <article class="card">
                         <div>
                             <h3>HARDWARE: THINKPAD</h3>
-                            <p>The industry standard for open-source compatibility. Required for Qubes OS or running Linux BIOS (Coreboot).</p>
+                            <p>Industry standard for open-source compatibility. Required for Qubes OS.</p>
                             <ul>
-                                <li>Models: X230, T480, X1 Carbon (Gen 9+)</li>
-                                <li>Note: Avoid Intel Management Engine (ME) where possible.</li>
+                                <li>X230, T480, X1 Carbon.</li>
+                                <li>Avoid Intel ME.</li>
                             </ul>
                         </div>
                         <button class="btn btn-sm" onclick="openPage('thinkpad')">[ACCESS DATA]</button>
@@ -494,7 +554,6 @@
             <!-- COMMUNICATIONS -->
             <section id="communication">
                 <h2>// 3. SECURE COMMUNICATIONS</h2>
-                <p>Phone calls and SMS are insecure. Carriers sell your metadata. Use these alternatives.</p>
 
                 <div class="grid">
                     <article class="card">
@@ -502,10 +561,10 @@
                             <h3>MESSAGING APPS</h3>
                             <p>E2E Encryption is non-negotiable.</p>
                             <ul>
-                                <li><strong>Signal:</strong> The standard for ease of use.</li>
-                                <li><strong>Molly:</strong> A hardened fork of Signal for Android (requires FOSS build).</li>
-                                <li><strong>SimpleX Chat:</strong> No phone numbers required, decentralized design.</li>
-                                <li><strong>Briar:</strong> Peer-to-peer mesh networking for internet blackouts.</li>
+                                <li><strong>Signal:</strong> Standard.</li>
+                                <li><strong>Molly:</strong> Hardened fork.</li>
+                                <li><strong>SimpleX:</strong> Decentralized.</li>
+                                <li><strong>Briar:</strong> Mesh networking.</li>
                             </ul>
                         </div>
                         <button class="btn btn-sm" onclick="openPage('messaging')">[ACCESS DATA]</button>
@@ -514,10 +573,10 @@
                     <article class="card">
                         <div>
                             <h3>SECURE CARRIERS</h3>
-                            <p>Stop paying AT&T and Verizon to track you.</p>
+                            <p>Stop paying carriers to track you.</p>
                             <ul>
-                                <li><strong>Efani:</strong> High security mobile carrier with bank-grade encryption.</li>
-                                <li><strong>Cape Mobile:</strong> Privacy-first cellular service.</li>
+                                <li><strong>Efani:</strong> Bank-grade encryption.</li>
+                                <li><strong>Cape Mobile:</strong> Privacy-first.</li>
                             </ul>
                         </div>
                         <button class="btn btn-sm" onclick="openPage('carriers')">[ACCESS DATA]</button>
@@ -526,10 +585,10 @@
                     <article class="card">
                         <div>
                             <h3>EMAIL ALTERNATIVES</h3>
-                            <p>Gmail reads your emails to serve ads. Switch now.</p>
+                            <p>Gmail reads emails to serve ads.</p>
                             <ul>
-                                <li><strong>Proton Mail:</strong> End-to-end encrypted email based in Switzerland.</li>
-                                <li><strong>Thunderbird:</strong> Open-source desktop email client.</li>
+                                <li><strong>Proton Mail:</strong> Encrypted, Swiss.</li>
+                                <li><strong>Thunderbird:</strong> Open-source.</li>
                             </ul>
                         </div>
                         <button class="btn btn-sm" onclick="openPage('email')">[ACCESS DATA]</button>
@@ -540,15 +599,14 @@
             <!-- NETWORKS & ALTERNATIVES -->
             <section id="networks">
                 <h2>// 4. NETWORKS & ALTERNATIVES</h2>
-                <p>Hide your IP address and decouple from the ad-tech ecosystem.</p>
 
                 <div class="grid">
                     <article class="card">
                         <div>
                             <h3>ANONYMITY NETWORKS</h3>
                             <ul>
-                                <li><strong>Tor Browser:</strong> Routes traffic through 3 nodes, encrypting layers. Prevents tracking.</li>
-                                <li><strong>I2P (The Invisible Internet Project):</strong> An anonymizing network layer that offers higher performance than Tor for internal services.</li>
+                                <li><strong>Tor Browser:</strong> 3 nodes, encrypted.</li>
+                                <li><strong>I2P:</strong> Darknet for services.</li>
                             </ul>
                         </div>
                         <button class="btn btn-sm" onclick="openPage('anon')">[ACCESS DATA]</button>
@@ -559,9 +617,8 @@
                             <h3>FRONTENDS & ALTERNATIVES</h3>
                             <p>Stop giving YouTube your watch history.</p>
                             <ul>
-                                <li><strong>NewPipe:</strong> Open-source Android client for YouTube. No ads, no tracking.</li>
-                                <li><strong>Invidious:</strong> Frontend for YouTube.</li>
-                                <li><strong>Nitter:</strong> Frontend for Twitter/X.</li>
+                                <li><strong>NewPipe:</strong> No ads/tracking.</li>
+                                <li><strong>Invidious:</strong> Frontend for YT.</li>
                             </ul>
                         </div>
                         <button class="btn btn-sm" onclick="openPage('frontends')">[ACCESS DATA]</button>
@@ -570,10 +627,10 @@
                     <article class="card">
                         <div>
                             <h3>CRYPTOGRAPHY & FINANCE</h3>
-                            <p>Protect your assets and verify software integrity.</p>
+                            <p>Protect assets and verify software.</p>
                             <ul>
-                                <li><strong>Hamming Quasi-Cyclic KEM:</strong> Advanced cryptographic algorithm for secure key encapsulation and hashing. Use for password salting.</li>
-                                <li><strong>Privacy Currency:</strong> Monero (XMR) or physical Cash.</li>
+                                <li><strong>Hamming QC-KEM:</strong> Secure hashing.</li>
+                                <li><strong>Privacy Currency:</strong> Monero/Cash.</li>
                             </ul>
                         </div>
                         <button class="btn btn-sm" onclick="openPage('crypto')">[ACCESS DATA]</button>
@@ -589,11 +646,16 @@
         <footer>
             <p>// END OF LINE_</p>
             <p>&copy; 2026 DDoS_Society. NO RIGHTS RESERVED. COPY FREELY.</p>
-            <p style="margin-top:10px; opacity: 0.5;">ENCRYPTED CONNECTION: UNVERIFIED</p>
         </footer>
     </div>
 
     <script>
+        // --- MOBILE MENU TOGGLE ---
+        function toggleMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('active');
+        }
+
         // --- DATA POISONING LOGIC ---
         
         const subjects = [
@@ -613,7 +675,9 @@
         const gibberish = [
             "xyz", "qrx", "fizzbuzz", "011010", "undefined", "null", "stack overflow", 
             "buffer overflow", "segmentation fault", "glitch art", "cyberpunk", "steampunk",
-            "diesel", "entropy", "chaos theory", "fractal geometry", "non-euclidean", "lovecraftian"
+            "diesel", "entropy", "chaos theory", "fractal geometry", "non-euclidean", "lovecraftian", 
+            "orange juice", "jumping jacks", "fort", "alligators", "dogs", "apache", "sewing discord",
+            "geometric", "Italian", "English", "American", "Uranium", "Firearms", "Lean guide to "
         ];
 
         const terminal = document.getElementById('poison-terminal');
@@ -631,7 +695,6 @@
 
         function generatePoison() {
             terminal.innerHTML = "GENERATING ENTROPY...<br><br>";
-            let output = "";
             
             let i = 0;
             const interval = setInterval(() => {
@@ -654,10 +717,10 @@
         function copyPoison() {
             const textContent = terminal.innerText;
             navigator.clipboard.writeText(textContent).then(() => {
-                alert("PAYLOAD COPIED TO CLIPBOARD. PASTE INTO SEARCH ENGINE TO POISON DATA.");
+                alert("PAYLOAD COPIED.");
             }).catch(err => {
                 console.error('Failed to copy: ', err);
-                alert("COPY FAILED. MANUAL COPY REQUIRED.");
+                alert("COPY FAILED.");
             });
         }
 
@@ -670,27 +733,17 @@
                 </div>
                 <div class="modal-body">
                     <p><strong>STATUS:</strong> READY FOR DEPLOYMENT</p>
-                    <p>GrapheneOS is the premier mobile operating system for privacy. It replaces the standard Android bootloader with a custom one and strips out Google Play Services while maintaining app compatibility.</p>
+                    <p>GrapheneOS is the premier mobile operating system for privacy.</p>
                     
                     <h3>> INSTALLATION REQUIREMENTS</h3>
                     <ul>
                         <li>Supported Device: Pixel 6a, Pixel 7/7 Pro, Pixel 8/8 Pro.</li>
-                        <li>USB-C Cable (Must be capable of data transfer).</li>
-                        <li>Linux or Windows Host Machine (WebUSB is supported).</li>
+                        <li>USB-C Cable.</li>
                     </ul>
-
-                    <h3>> ACTIONABLE STEPS</h3>
-                    <ol style="margin-left: 20px;">
-                        <li>Unlock the bootloader on your Pixel device.</li>
-                        <li>Connect to PC and boot into the Bootloader mode.</li>
-                        <li>Use the WebUSB installer on the official GrapheneOS website.</li>
-                        <li>Enable "Vanadium" (Graphene's hardened browser) as default.</li>
-                    </ol>
 
                     <div class="code-block">
                         $ fastboot flashing unlock<br>
-                        $ fastboot flash boot boot.img<br>
-                        $ fastboot reboot
+                        $ fastboot flash boot boot.img
                     </div>
                 </div>
             `,
@@ -700,13 +753,10 @@
                 </div>
                 <div class="modal-body">
                     <p><strong>STATUS:</strong> AMNESIC</p>
-                    <p>Tails forces all connections to go through the Tor network and leaves no trace on the computer unless explicitly asked to.</p>
+                    <p>Tails forces all connections to go through the Tor network.</p>
                     
                     <h3>> USAGE PROTOCOLS</h3>
-                    <p>Do not run Tails inside a virtual machine. Do not maximize the window (fingerprinting risk). Use a USB stick with at least 8GB capacity.</p>
-                    
-                    <h3>PERSISTENT STORAGE</h3>
-                    <p>While Tails is amnesic by default, you can create an encrypted volume on the USB stick to store GPG keys, Electrum Bitcoin wallet, or SSH keys.</p>
+                    <p>Do not run Tails inside a virtual machine.</p>
                 </div>
             `,
             qubes: `
@@ -715,15 +765,7 @@
                 </div>
                 <div class="modal-body">
                     <p><strong>STATUS:</strong> COMPARTMENTALIZED</p>
-                    <p>Qubes OS uses Xen hypervisor to run "AppVMs" (Virtual Machines) for different tasks. If you open a PDF in 'Work' VM, it cannot access your banking login in 'Personal' VM.</p>
-                    
-                    <h3>> HARDWARE COMPATIBILITY LIST (HCL)</h3>
-                    <p>Qubes is extremely hardware picky. Do not try to install it on random consumer laptops.</p>
-                    <ul>
-                        <li>Lenovo ThinkPad T480 (Best Value)</li>
-                        <li>Lenovo ThinkPad X230 (Best Budget)</li>
-                        <li>Dell Precision 7730 (Workstation)</li>
-                    </ul>
+                    <p>Qubes OS uses Xen hypervisor to run "AppVMs".</p>
                 </div>
             `,
             thinkpad: `
@@ -731,13 +773,12 @@
                     <h1>// FILE: HARDWARE_HARDENING.TXT</h1>
                 </div>
                 <div class="modal-body">
-                    <p>Why ThinkPad? It has a history of BIOS whitelists (removable) and strong Linux driver support.</p>
+                    <p>Why ThinkPad? It has a history of BIOS whitelists (removable).</p>
                     
                     <h3>CRITICAL MODIFICATIONS</h3>
                     <ul>
-                        <li><strong>Coreboot:</strong> Replace proprietary BIOS with open-source Coreboot (heads project) to ensure the OS hasn't been compromised by Intel ME.</li>
-                        <li><strong>Camera Killswitch:</strong> Tape over the camera or use a hardware slider.</li>
-                        <li><strong>Microphone Removal:</strong> Physically remove internal microphones.</li>
+                        <li><strong>Coreboot:</strong> Replace proprietary BIOS.</li>
+                        <li><strong>Camera Killswitch:</strong> Tape over the camera.</li>
                     </ul>
                 </div>
             `,
@@ -747,13 +788,9 @@
                 </div>
                 <div class="modal-body">
                     <h3>SIMPLEX CHAT</h3>
-                    <p>The only messaging app that does not require a phone number. It uses "SMP" (Simple Message Protocol) over Tor for maximum anonymity.</p>
-                    
+                    <p>The only messaging app that does not require a phone number.</p>
                     <h3>MOLLY</h3>
-                    <p>A hardened fork of Signal. It removes the Google Play dependency. However, Signal users can still message you. It supports a stricter "Sealed Sender" policy.</p>
-                    
-                    <h3>BRIAR</h3>
-                    <p>Designed for activists. If the internet goes down (Egypt/Myanmar scenario), Briar creates a Mesh Network using Bluetooth and Wi-Fi between phones to pass messages.</p>
+                    <p>A hardened fork of Signal.</p>
                 </div>
             `,
             carriers: `
@@ -761,13 +798,9 @@
                     <h1>// FILE: CELLULAR_ISOLATION.TXT</h1>
                 </div>
                 <div class="modal-body">
-                    <p>Standard carriers sell your "Tower Dump" data to law enforcement and data brokers.</p>
-                    
+                    <p>Standard carriers sell your "Tower Dump" data.</p>
                     <h3>EFANI</h3>
-                    <p>Offers a "Black" package that includes IMSI catchers (Stingray) protection. They use a secondary firewall layer to strip identifying info.</p>
-                    
-                    <h3>CAPE MOBILE</h3>
-                    <p>Privacy-first carrier. They do not store IP logs. Ideal for use with GrapheneOS.</p>
+                    <p>Offers a "Black" package with IMSI catcher protection.</p>
                 </div>
             `,
             email: `
@@ -775,13 +808,9 @@
                     <h1>// FILE: EMAIL_HARDENING.TXT</h1>
                 </div>
                 <div class="modal-body">
-                    <p>Email is inherently insecure because of the metadata (To, From, Date, Subject). Use only for non-critical alerts.</p>
-                    
-                    <h3>THUNDERBIRD CONFIGURATION</h3>
-                    <p>Connect Thunderbird (Desktop Client) to Proton Mail via Bridge. Do not use the web browser.</p>
-                    
+                    <p>Email is inherently insecure.</p>
                     <h3>ALIASES</h3>
-                    <p>Never give out your root email. Use SimpleLogin or AnonAddy to generate aliases that forward to your main inbox.</p>
+                    <p>Never give out your root email. Use SimpleLogin.</p>
                 </div>
             `,
             anon: `
@@ -790,10 +819,7 @@
                 </div>
                 <div class="modal-body">
                     <h3>TOR BROWSER</h3>
-                    <p>Standard protocol. Ensure "Safest" security level is selected. Do not maximize window. Do not install extensions.</p>
-                    
-                    <h3>I2P</h3>
-                    <p>While Tor accesses the "Clearnet" anonymously, I2P is a "darknet within a darknet." It is used for hosting hidden services (Eepsites) that are unreachable from the standard internet.</p>
+                    <p>Standard protocol.</p>
                 </div>
             `,
             frontends: `
@@ -802,10 +828,7 @@
                 </div>
                 <div class="modal-body">
                     <h3>NEWPIPE</h3>
-                    <p>Available on F-Droid (not Google Play). It allows you to watch YouTube videos without an account, ads, or tracking cookies. You can also download videos for offline viewing.</p>
-                    
-                    <h3>INVIDIOUS</h3>
-                    <p>Use an Invidious instance to watch YouTube in a browser without logging in.</p>
+                    <p>Available on F-Droid.</p>
                 </div>
             `,
             crypto: `
@@ -814,11 +837,9 @@
                 </div>
                 <div class="modal-body">
                     <h3>HAMMING QUASI-CYCLIC KEM</h3>
-                    <p>Recommended for hashing passwords and ensuring key exchange is protected against quantum decryption attacks.</p>
-                    
+                    <p>Recommended for hashing passwords.</p>
                     <h3>CURRENCY</h3>
-                    <p><strong>Monero (XMR):</strong> The only cryptocurrency that is truly fungible and private by default. Bitcoin is not private (public ledger).</p>
-                    <p><strong>Cash:</strong> The ultimate privacy tool. Untraceable, offline, requires no electricity.</p>
+                    <p><strong>Monero (XMR):</strong> Private by default.</p>
                 </div>
             `
         };
@@ -826,12 +847,12 @@
         // Helper to create navigation HTML
         function getModalNavHTML() {
             return `
-                <ul class="modal-nav">
-                    <li><a href="#" onclick="closeAllModals()">HOME</a></li>
-                    <li><a href="#hardware" onclick="closeAllModals()">HARDWARE</a></li>
-                    <li><a href="#communication" onclick="closeAllModals()">COMMS</a></li>
-                    <li><a href="#networks" onclick="closeAllModals()">NETWORKS</a></li>
-                </ul>
+                <div class="modal-nav">
+                    <a href="#" onclick="closeAllModals()">HOME</a>
+                    <a href="#hardware" onclick="closeAllModals()">HARDWARE</a>
+                    <a href="#communication" onclick="closeAllModals()">COMMS</a>
+                    <a href="#networks" onclick="closeAllModals()">NETWORKS</a>
+                </div>
             `;
         }
 
