@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>// PROJECT: BLACKOUT - DATA POISONING PROTOCOL</title>
+    <style>
+        :root {
+            --terminal-green: #39ff14;
+            --terminal-dim: #1f5c12;
+            --alert-red: #ff003c;
+            --dark-red: #4a000b;
+            --bg-black: #050505;
+            --panel-bg: #0a0a0a;
+            --font-stack: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            color: var(--terminal-green);
+            font-family: var(--font-stack);
+            line-height: 1.6;
+            overflow-x: hidden;
+            font-size: 16px;
+            padding-top: 60px; /* Space for fixed nav */
+            position: relative;
+            z-index: 0;
+        }
+
+        /* --- CRT SCANLINES OVERLAY --- */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            z-index: 1000; 
+            pointer-events: none; 
+        }
+
+        .scanlines::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: rgba(18, 16, 16, 0.1);
+            opacity: 0;
+            z-index: 1000;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.027906; }
+            5% { opacity: 0.048532; }
+            10% { opacity: 0.013564; }
+            15% { opacity: 0.086453; }
+            20% { opacity: 0.027906; }
+            100% { opacity: 0.027906; }
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: var(--bg-black);
+            border-bottom: 2px solid var(--alert-red);
+            z-index: 2000; 
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--alert-red);
+            text-transform: uppercase;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--terminal-green);
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            z-index: 2001;
+            position: relative;
+        }
+
+        nav a:hover {
+            color: var(--alert-red);
+            text-shadow: 0 0 5px var(--alert-red);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10; 
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1, h2, h3 {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            text-shadow: 0 0 5px var(--terminal-green);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            border-bottom: 2px solid var(--alert-red);
+            padding-bottom: 10px;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            color: var(--alert-red);
+            border-left: 5px solid var(--alert-red);
+            padding-left: 15px;
+            margin-top: 20px; 
+            text-shadow: 0 0 5px var(--alert-red);
+        }
+
+        p {
+            margin-bottom: 15px;
+            max-width: 800px;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.2em;
+            background-color: var(--terminal-green);
+            animation: blink 1s step-end infinite;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* --- COMPONENTS --- */
+        .btn {
+            display: inline-block;
+            background: transparent;
+            border: 2px solid var(--terminal-green);
+            color: var(--terminal-green);
+            padding: 15px 30px;
+            font-family: var(--font-stack);
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px 10px 0;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            z-index: 11; 
+        }
+
+        .btn:hover {
+            background-color: var(--terminal-green);
+            color: var(--bg-black);
+            box-shadow: 0 0 15px var(--terminal-green);
+        }
+
+        .btn-alert {
+            border-color: var(--alert-red);
+            color: var(--alert-red);
+        }
+
+        .btn-alert:hover {
+            background-color: var(--alert-red);
+            color: var(--bg-black);
+            box-shadow: 0 0 15px var(--alert-red);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            margin-top: 15px;
+        }
+
+        /* --- GRID LAYOUTS --- */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .card {
+            border: 1px solid var(--terminal-dim);
+            padding: 20px;
+            background: linear-gradient(145deg, var(--panel-bg), var(--dark-red));
+            transition: transform 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 11;
+        }
+
+        .card:hover {
+            border-color: var(--alert-red);
+            transform: translateY(-2px);
+        }
+
+        .card h3 {
+            color: var(--terminal-green);
+            font-size: 1.3rem;
+            border-bottom: 1px dashed var(--terminal-dim);
+            padding-bottom: 5px;
+        }
+
+        .card ul {
+            list-style: square inside;
+            margin-top: 15px;
+            color: #ccc;
+        }
+
+        .card li {
+            margin-bottom: 8px;
+        }
+
+        /* --- POISON GENERATOR --- */
+        #poison-terminal {
+            background: #000;
+            border: 2px solid var(--alert-red);
+            padding: 20px;
+            margin-bottom: 20px;
+            height: 200px;
+            overflow-y: auto;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            box-shadow: inset 0 0 20px rgba(255, 0, 60, 0.2);
+        }
+
+        .status-bar {
+            background: var(--alert-red);
+            color: black;
+            padding: 5px 10px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* --- MODAL / PAGE OVERLAY --- */
+        .modal {
+            display: none; 
+            position: fixed;
+            z-index: 3000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.95);
+            border: 5px solid var(--alert-red);
+            overflow-y: auto;
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: var(--bg-black);
+            margin: 40px auto;
+            padding: 40px;
+            border: 2px solid var(--terminal-green);
+            width: 80%;
+            max-width: 900px;
+            position: relative;
+            box-shadow: 0 0 30px var(--terminal-green);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            color: var(--alert-red);
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 3001;
+        }
+
+        .close-btn:hover {
+            color: var(--terminal-green);
+        }
+
+        .modal-header {
+            border-bottom: 2px solid var(--alert-red);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* --- MODAL NAVIGATION STYLES --- */
+        .modal-nav {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            border-top: 1px dashed var(--terminal-dim);
+            padding-top: 15px;
+        }
+
+        .modal-nav a {
+            text-decoration: none;
+            color: var(--terminal-green);
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .modal-nav a:hover {
+            color: var(--alert-red);
+            text-shadow: 0 0 5px var(--alert-red);
+            background-color: #111;
+            padding: 2px 5px;
+        }
+
+        .modal-body h3 {
+            color: var(--alert-red);
+            margin-top: 30px;
+        }
+        
+        .code-block {
+            background: #111;
+            padding: 15px;
+            border-left: 4px solid var(--terminal-green);
+            margin: 15px 0;
+            font-family: monospace;
+            color: #ccc;
+        }
+
+        /* --- FOOTER --- */
+        footer {
+            margin-top: 80px;
+            border-top: 1px solid var(--alert-red);
+            padding: 40px 0;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--terminal-dim);
+            padding-bottom: 80px;
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.4rem; }
+            .grid { grid-template-columns: 1fr; }
+            nav ul { display: none; } 
+            .modal-content { width: 95%; margin: 20px auto; padding: 20px; }
+            .modal-nav { flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SCANLINES OVERLAY DIV -->
+    <div class="scanlines"></div>
+
+    <!-- NAVIGATION BAR -->
+    <nav>
+        <div class="logo">DDoS_Society <span class="cursor"></span></div>
+        <ul>
+            <li><a href="#" onclick="closeAllModals()">HOME</a></li>
+            <li><a href="#hardware" onclick="closeAllModals()">HARDWARE</a></li>
+            <li><a href="#communication" onclick="closeAllModals()">COMMS</a></li>
+            <li><a href="#networks" onclick="closeAllModals()">NETWORKS</a></li>
+        </ul>
+    </nav>
+
+    <!-- MODAL (DYNAMIC PAGE LOADER) -->
+    <div id="dataModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div id="modal-body-container">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>> SYSTEM_ROOT_ACCESS: GRANTED_<span class="cursor"></span></h1>
+            <p>PROTOCOL: DATA POISONING & DIGITAL SURVIVAL</p>
+            <p>DATE: 2026 // STATUS: CRITICAL</p>
+        </header>
+
+        <main>
+            <!-- INTRO / HERO SECTION -->
+            <section>
+                <h2>// 1. THE THREAT</h2>
+                <p>The algorithms track you. YouTube, TikTok, Google—they construct a psychological profile to predict and control your behavior. The "Doomsday" of privacy is already here. To survive, we must become noise. We must poison the data well.</p>
+                <p>The objective is to confuse the Artificial Intelligence. By injecting erratic, nonsensical, and contradictory search queries into their systems, we degrade the accuracy of their predictive models. Protect yourself. Hide in the noise.</p>
+                
+                <div style="margin-top: 40px; border: 1px solid var(--terminal-green); padding: 20px;">
+                    <h3 style="margin-top: 0;">> DATA_POISONING_MODULE.EXE</h3>
+                    <p>Execute the script below. Copy these 250 randomized search queries and run them in your tracked browsers to break the algorithmic link.</p>
+                    
+                    <div class="status-bar">
+                        <span>TERMINAL_OUTPUT</span>
+                        <span>LENGTH: 250 QURIES</span>
+                    </div>
+                    <div id="poison-terminal">AWAITING INPUT...<br>CLICK 'INITIATE POISON' TO GENERATE PAYLOAD...</div>
+                    
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-alert" onclick="generatePoison()">INITIATE POISON</button>
+                        <button class="btn" onclick="copyPoison()">COPY TO CLIPBOARD</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- HARDWARE & OS -->
+            <section id="hardware">
+                <h2>// 2. HARDWARE & OPERATING SYSTEMS</h2>
+                <p>Mainstream operating systems are surveillance backdoors. You must migrate to hardened, open-source environments.</p>
+                
+                <div class="grid">
+                    <article class="card">
+                        <div>
+                            <h3>GRAPHENE OS</h3>
+                            <p>The mobile privacy frontier. A security and privacy focused mobile OS with Android app compatibility developed outside of Google.</p>
+                            <ul>
+                                <li>Recommendation: Pixel 6a, 7, or 8 Pro.</li>
+                                <li>Features: Sandboxed Google Play, hardened memory allocator.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('graphene')">[ACCESS DATA]</button>
+                    </article>
+
+                    <article class="card">
+                        <div>
+                            <h3>TAILS OS</h3>
+                            <p>The Amnesic Incognito Live System. Routes traffic through Tor and leaves no trace on the machine.</p>
+                            <ul>
+                                <li>Usage: Boot from USB stick.</li>
+                                <li>Ideal for: Whistleblowers, journalists, sensitive research.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('tails')">[ACCESS DATA]</button>
+                    </article>
+
+                    <article class="card">
+                        <div>
+                            <h3>QUBES OS</h3>
+                            <p>Reasonable security for the paranoid. Uses Xen hypervisor to run security domains (qubes) isolated from each other.</p>
+                            <ul>
+                                <li>Hardware Req: ThinkPad (Recommended)</li>
+                                <li>Architecture: "Security by Compartmentalization".</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('qubes')">[ACCESS DATA]</button>
+                    </article>
+
+                    <article class="card">
+                        <div>
+                            <h3>HARDWARE: THINKPAD</h3>
+                            <p>The industry standard for open-source compatibility. Required for Qubes OS or running Linux BIOS (Coreboot).</p>
+                            <ul>
+                                <li>Models: X230, T480, X1 Carbon (Gen 9+)</li>
+                                <li>Note: Avoid Intel Management Engine (ME) where possible.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('thinkpad')">[ACCESS DATA]</button>
+                    </article>
+                </div>
+            </section>
+
+            <!-- COMMUNICATIONS -->
+            <section id="communication">
+                <h2>// 3. SECURE COMMUNICATIONS</h2>
+                <p>Phone calls and SMS are insecure. Carriers sell your metadata. Use these alternatives.</p>
+
+                <div class="grid">
+                    <article class="card">
+                        <div>
+                            <h3>MESSAGING APPS</h3>
+                            <p>E2E Encryption is non-negotiable.</p>
+                            <ul>
+                                <li><strong>Signal:</strong> The standard for ease of use.</li>
+                                <li><strong>Molly:</strong> A hardened fork of Signal for Android (requires FOSS build).</li>
+                                <li><strong>SimpleX Chat:</strong> No phone numbers required, decentralized design.</li>
+                                <li><strong>Briar:</strong> Peer-to-peer mesh networking for internet blackouts.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('messaging')">[ACCESS DATA]</button>
+                    </article>
+
+                    <article class="card">
+                        <div>
+                            <h3>SECURE CARRIERS</h3>
+                            <p>Stop paying AT&T and Verizon to track you.</p>
+                            <ul>
+                                <li><strong>Efani:</strong> High security mobile carrier with bank-grade encryption.</li>
+                                <li><strong>Cape Mobile:</strong> Privacy-first cellular service.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('carriers')">[ACCESS DATA]</button>
+                    </article>
+
+                    <article class="card">
+                        <div>
+                            <h3>EMAIL ALTERNATIVES</h3>
+                            <p>Gmail reads your emails to serve ads. Switch now.</p>
+                            <ul>
+                                <li><strong>Proton Mail:</strong> End-to-end encrypted email based in Switzerland.</li>
+                                <li><strong>Thunderbird:</strong> Open-source desktop email client.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('email')">[ACCESS DATA]</button>
+                    </article>
+                </div>
+            </section>
+
+            <!-- NETWORKS & ALTERNATIVES -->
+            <section id="networks">
+                <h2>// 4. NETWORKS & ALTERNATIVES</h2>
+                <p>Hide your IP address and decouple from the ad-tech ecosystem.</p>
+
+                <div class="grid">
+                    <article class="card">
+                        <div>
+                            <h3>ANONYMITY NETWORKS</h3>
+                            <ul>
+                                <li><strong>Tor Browser:</strong> Routes traffic through 3 nodes, encrypting layers. Prevents tracking.</li>
+                                <li><strong>I2P (The Invisible Internet Project):</strong> An anonymizing network layer that offers higher performance than Tor for internal services.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('anon')">[ACCESS DATA]</button>
+                    </article>
+
+                    <article class="card">
+                        <div>
+                            <h3>FRONTENDS & ALTERNATIVES</h3>
+                            <p>Stop giving YouTube your watch history.</p>
+                            <ul>
+                                <li><strong>NewPipe:</strong> Open-source Android client for YouTube. No ads, no tracking.</li>
+                                <li><strong>Invidious:</strong> Frontend for YouTube.</li>
+                                <li><strong>Nitter:</strong> Frontend for Twitter/X.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('frontends')">[ACCESS DATA]</button>
+                    </article>
+
+                    <article class="card">
+                        <div>
+                            <h3>CRYPTOGRAPHY & FINANCE</h3>
+                            <p>Protect your assets and verify software integrity.</p>
+                            <ul>
+                                <li><strong>Hamming Quasi-Cyclic KEM:</strong> Advanced cryptographic algorithm for secure key encapsulation and hashing. Use for password salting.</li>
+                                <li><strong>Privacy Currency:</strong> Monero (XMR) or physical Cash.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('crypto')">[ACCESS DATA]</button>
+                    </article>
+                </div>
+            </section>
+
+            <section style="margin-top: 60px;">
+                <button class="btn" onclick="alert('PROTOCOL INITIATED. STAY SAFE.')">ACKNOWLEDGE PROTOCOL</button>
+            </section>
+        </main>
+
+        <footer>
+            <p>// END OF LINE_</p>
+            <p>&copy; 2026 DDoS_Society. NO RIGHTS RESERVED. COPY FREELY.</p>
+            <p style="margin-top:10px; opacity: 0.5;">ENCRYPTED CONNECTION: UNVERIFIED</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- DATA POISONING LOGIC ---
+        
+        const subjects = [
+            "how to knit", "quantum mechanics for toddlers", "best recipes for plutonium stew", 
+            "why is the sky purple", "history of the 14th century spoon", "cat memes in latin",
+            "underwater basket weaving techniques", "conspiracy theories about garden gnomes",
+            "how to train a goldfish", "advanced astrophysics for dummies", "vegan bodybuilding guide",
+            "top 10 underground bunkers in kansas", "diy nuclear reactor", "silent meditation in loud places",
+            "farming techniques on mars", "ancient alien technology", "how to disappear completely",
+            "survival tactics for zombie apocalypse", "origami with titanium sheets", "baking bread with algebra",
+            "philosophy of teletubbies", "competitive sleeping championships", "bee keeping in antarctica",
+            "the mating habits of robots", "coding in morse code", "cryptocurrency mining on an abacus",
+            "building a faraday cage", "radio jargon for beginners", "ham radio operator slang",
+            "linux kernel panic art", "graphene os vs ios vs android", "tails os installation on a toaster"
+        ];
+
+        const gibberish = [
+            "xyz", "qrx", "fizzbuzz", "011010", "undefined", "null", "stack overflow", 
+            "buffer overflow", "segmentation fault", "glitch art", "cyberpunk", "steampunk",
+            "diesel", "entropy", "chaos theory", "fractal geometry", "non-euclidean", "lovecraftian"
+        ];
+
+        const terminal = document.getElementById('poison-terminal');
+
+        function generateRandomQuery() {
+            const type = Math.random();
+            if (type < 0.4) {
+                return subjects[Math.floor(Math.random() * subjects.length)];
+            } else if (type < 0.7) {
+                return subjects[Math.floor(Math.random() * subjects.length)] + " " + gibberish[Math.floor(Math.random() * gibberish.length)];
+            } else {
+                return gibberish[Math.floor(Math.random() * gibberish.length)] + " " + gibberish[Math.floor(Math.random() * gibberish.length)];
+            }
+        }
+
+        function generatePoison() {
+            terminal.innerHTML = "GENERATING ENTROPY...<br><br>";
+            let output = "";
+            
+            let i = 0;
+            const interval = setInterval(() => {
+                let batch = "";
+                for(let j=0; j<5; j++) {
+                    if (i >= 250) break;
+                    batch += `search_query[${i+1}]: ${generateRandomQuery()}<br>`;
+                    i++;
+                }
+                terminal.innerHTML += batch;
+                terminal.scrollTop = terminal.scrollHeight;
+
+                if (i >= 250) {
+                    clearInterval(interval);
+                    terminal.innerHTML += "<br><br>>> POISON PACKET COMPLETE. COPY TO CLIPBOARD TO EXECUTE.";
+                }
+            }, 10);
+        }
+
+        function copyPoison() {
+            const textContent = terminal.innerText;
+            navigator.clipboard.writeText(textContent).then(() => {
+                alert("PAYLOAD COPIED TO CLIPBOARD. PASTE INTO SEARCH ENGINE TO POISON DATA.");
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert("COPY FAILED. MANUAL COPY REQUIRED.");
+            });
+        }
+
+        // --- PAGE / MODAL CONTENT SYSTEM ---
+
+        const pageContent = {
+            graphene: `
+                <div class="modal-header">
+                    <h1>// FILE: GRAPHENE_OS_MANIFEST.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p><strong>STATUS:</strong> READY FOR DEPLOYMENT</p>
+                    <p>GrapheneOS is the premier mobile operating system for privacy. It replaces the standard Android bootloader with a custom one and strips out Google Play Services while maintaining app compatibility.</p>
+                    
+                    <h3>> INSTALLATION REQUIREMENTS</h3>
+                    <ul>
+                        <li>Supported Device: Pixel 6a, Pixel 7/7 Pro, Pixel 8/8 Pro.</li>
+                        <li>USB-C Cable (Must be capable of data transfer).</li>
+                        <li>Linux or Windows Host Machine (WebUSB is supported).</li>
+                    </ul>
+
+                    <h3>> ACTIONABLE STEPS</h3>
+                    <ol style="margin-left: 20px;">
+                        <li>Unlock the bootloader on your Pixel device.</li>
+                        <li>Connect to PC and boot into the Bootloader mode.</li>
+                        <li>Use the WebUSB installer on the official GrapheneOS website.</li>
+                        <li>Enable "Vanadium" (Graphene's hardened browser) as default.</li>
+                    </ol>
+
+                    <div class="code-block">
+                        $ fastboot flashing unlock<br>
+                        $ fastboot flash boot boot.img<br>
+                        $ fastboot reboot
+                    </div>
+                </div>
+            `,
+            tails: `
+                <div class="modal-header">
+                    <h1>// FILE: TAILS_OS_GUIDE.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p><strong>STATUS:</strong> AMNESIC</p>
+                    <p>Tails forces all connections to go through the Tor network and leaves no trace on the computer unless explicitly asked to.</p>
+                    
+                    <h3>> USAGE PROTOCOLS</h3>
+                    <p>Do not run Tails inside a virtual machine. Do not maximize the window (fingerprinting risk). Use a USB stick with at least 8GB capacity.</p>
+                    
+                    <h3>PERSISTENT STORAGE</h3>
+                    <p>While Tails is amnesic by default, you can create an encrypted volume on the USB stick to store GPG keys, Electrum Bitcoin wallet, or SSH keys.</p>
+                </div>
+            `,
+            qubes: `
+                <div class="modal-header">
+                    <h1>// FILE: QUBES_OS_ARCHITECTURE.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p><strong>STATUS:</strong> COMPARTMENTALIZED</p>
+                    <p>Qubes OS uses Xen hypervisor to run "AppVMs" (Virtual Machines) for different tasks. If you open a PDF in 'Work' VM, it cannot access your banking login in 'Personal' VM.</p>
+                    
+                    <h3>> HARDWARE COMPATIBILITY LIST (HCL)</h3>
+                    <p>Qubes is extremely hardware picky. Do not try to install it on random consumer laptops.</p>
+                    <ul>
+                        <li>Lenovo ThinkPad T480 (Best Value)</li>
+                        <li>Lenovo ThinkPad X230 (Best Budget)</li>
+                        <li>Dell Precision 7730 (Workstation)</li>
+                    </ul>
+                </div>
+            `,
+            thinkpad: `
+                <div class="modal-header">
+                    <h1>// FILE: HARDWARE_HARDENING.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p>Why ThinkPad? It has a history of BIOS whitelists (removable) and strong Linux driver support.</p>
+                    
+                    <h3>CRITICAL MODIFICATIONS</h3>
+                    <ul>
+                        <li><strong>Coreboot:</strong> Replace proprietary BIOS with open-source Coreboot (heads project) to ensure the OS hasn't been compromised by Intel ME.</li>
+                        <li><strong>Camera Killswitch:</strong> Tape over the camera or use a hardware slider.</li>
+                        <li><strong>Microphone Removal:</strong> Physically remove internal microphones.</li>
+                    </ul>
+                </div>
+            `,
+            messaging: `
+                <div class="modal-header">
+                    <h1>// FILE: SECURE_CHAT_PROTOCOLS.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <h3>SIMPLEX CHAT</h3>
+                    <p>The only messaging app that does not require a phone number. It uses "SMP" (Simple Message Protocol) over Tor for maximum anonymity.</p>
+                    
+                    <h3>MOLLY</h3>
+                    <p>A hardened fork of Signal. It removes the Google Play dependency. However, Signal users can still message you. It supports a stricter "Sealed Sender" policy.</p>
+                    
+                    <h3>BRIAR</h3>
+                    <p>Designed for activists. If the internet goes down (Egypt/Myanmar scenario), Briar creates a Mesh Network using Bluetooth and Wi-Fi between phones to pass messages.</p>
+                </div>
+            `,
+            carriers: `
+                <div class="modal-header">
+                    <h1>// FILE: CELLULAR_ISOLATION.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p>Standard carriers sell your "Tower Dump" data to law enforcement and data brokers.</p>
+                    
+                    <h3>EFANI</h3>
+                    <p>Offers a "Black" package that includes IMSI catchers (Stingray) protection. They use a secondary firewall layer to strip identifying info.</p>
+                    
+                    <h3>CAPE MOBILE</h3>
+                    <p>Privacy-first carrier. They do not store IP logs. Ideal for use with GrapheneOS.</p>
+                </div>
+            `,
+            email: `
+                <div class="modal-header">
+                    <h1>// FILE: EMAIL_HARDENING.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p>Email is inherently insecure because of the metadata (To, From, Date, Subject). Use only for non-critical alerts.</p>
+                    
+                    <h3>THUNDERBIRD CONFIGURATION</h3>
+                    <p>Connect Thunderbird (Desktop Client) to Proton Mail via Bridge. Do not use the web browser.</p>
+                    
+                    <h3>ALIASES</h3>
+                    <p>Never give out your root email. Use SimpleLogin or AnonAddy to generate aliases that forward to your main inbox.</p>
+                </div>
+            `,
+            anon: `
+                <div class="modal-header">
+                    <h1>// FILE: NETWORK_OBSCURITY.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <h3>TOR BROWSER</h3>
+                    <p>Standard protocol. Ensure "Safest" security level is selected. Do not maximize window. Do not install extensions.</p>
+                    
+                    <h3>I2P</h3>
+                    <p>While Tor accesses the "Clearnet" anonymously, I2P is a "darknet within a darknet." It is used for hosting hidden services (Eepsites) that are unreachable from the standard internet.</p>
+                </div>
+            `,
+            frontends: `
+                <div class="modal-header">
+                    <h1>// FILE: DECOUPLING_ALGORITHMS.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <h3>NEWPIPE</h3>
+                    <p>Available on F-Droid (not Google Play). It allows you to watch YouTube videos without an account, ads, or tracking cookies. You can also download videos for offline viewing.</p>
+                    
+                    <h3>INVIDIOUS</h3>
+                    <p>Use an Invidious instance to watch YouTube in a browser without logging in.</p>
+                </div>
+            `,
+            crypto: `
+                <div class="modal-header">
+                    <h1>// FILE: SECURE_FINANCE.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <h3>HAMMING QUASI-CYCLIC KEM</h3>
+                    <p>Recommended for hashing passwords and ensuring key exchange is protected against quantum decryption attacks.</p>
+                    
+                    <h3>CURRENCY</h3>
+                    <p><strong>Monero (XMR):</strong> The only cryptocurrency that is truly fungible and private by default. Bitcoin is not private (public ledger).</p>
+                    <p><strong>Cash:</strong> The ultimate privacy tool. Untraceable, offline, requires no electricity.</p>
+                </div>
+            `
+        };
+
+        // Helper to create navigation HTML
+        function getModalNavHTML() {
+            return `
+                <ul class="modal-nav">
+                    <li><a href="#" onclick="closeAllModals()">HOME</a></li>
+                    <li><a href="#hardware" onclick="closeAllModals()">HARDWARE</a></li>
+                    <li><a href="#communication" onclick="closeAllModals()">COMMS</a></li>
+                    <li><a href="#networks" onclick="closeAllModals()">NETWORKS</a></li>
+                </ul>
+            `;
+        }
+
+        function openPage(pageKey) {
+            const modal = document.getElementById('dataModal');
+            const contentContainer = document.getElementById('modal-body-container');
+            
+            if (pageContent[pageKey]) {
+                contentContainer.innerHTML = pageContent[pageKey];
+                
+                // Inject Navigation into the Modal Header
+                const header = contentContainer.querySelector('.modal-header');
+                if(header) {
+                    header.innerHTML += getModalNavHTML();
+                }
+                
+                modal.style.display = "block";
+                document.body.style.overflow = "hidden"; // Stop background scrolling
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('dataModal').style.display = "none";
+            document.body.style.overflow = "auto"; // Restore scrolling
+        }
+
+        function closeAllModals() {
+            closeModal();
+        }
+
+        // Close modal if user clicks outside content
+        window.onclick = function(event) {
+            const modal = document.getElementById('dataModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+    </script>
+</body>
+</html>
