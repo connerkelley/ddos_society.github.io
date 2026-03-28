@@ -42,52 +42,36 @@
         }
 
         /* --- MATRIX RAIN BACKGROUND --- */
+        /* Optimized: Removed SVG background, now uses text content injected by JS */
         .matrix-container {
             position: fixed;
-            top: -200px; /* Start higher to ensure it loops cleanly at the bottom */
-            bottom: -200px;
+            top: 0;
+            bottom: 0;
             width: 100%;
-            z-index: 1;
+            z-index: 1; /* Behind everything */
             pointer-events: none;
+            overflow: hidden;
         }
 
         .matrix-column {
             position: absolute;
+            /* Height is doubled to allow smooth falling loop */
+            height: 200%; 
             width: 25px; 
-            font-size: 10px; /* Smaller font size for better aesthetics */
-            line-height: 10px;
+            font-size: 14px;
+            line-height: 14px;
             color: var(--terminal-dim);
-            text-shadow: 0 0 2px var(--terminal-green); /* Softer glow, smaller text */
-            white-space: pre;
-            opacity: 0.4;
-            /* TALL SVG BACKGROUND FOR LOOPING */
-            background-image: url("data:image/svg+xml,%3Csvg width='25' height='4000' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='0' y='20' font-family='monospace' font-size='10' fill='%231f5c12'%3E00110110001001011000110110001001011000110110001001%3C/text%3E%3Ctext x='0' y='40' font-family='monospace' font-size='10' fill='%231f5c12'%3E0101010110010100110010100110010100110010100110%3C/text%3E%3Ctext x='0' y='60' font-family='monospace' font-size='10' fill='%231f5c12'%3E1100110011001100110011001100110011001100110011001100%3C/text%3E%3Ctext x='0' y='80' font-family='monospace' font-size='10' fill='%231f5c12'%3E10010010100100110010100100110010100100110010100100%3C/text%3E%3Ctext x='0' y='100' font-family='monospace' font-size='10' fill='%231f5c12'%3E010110100110100110100110100110100110100110100101%3C/text%3E%3Ctext x='0' y='120' font-family='monospace' font-size='10' fill='%231f5c12'%3E10010010100100110010100100110010100100110010100100%3C/text%3E%3Ctext x='0' y='140' font-family='monospace' font-size='10' fill='%231f5c12'%3E010110100110100110100110100110100110100110100110101%3C/text%3E%3Ctext x='0' y='160' font-family='monospace' font-size='10' fill='%231f5c12'%3E1100110011001100110011001100110011001100110011001100%3C/text%3E%3Ctext x='0' y='180' font-family='monospace' font-size='10' fill='%231f5c12'%3E10010010100100110010100100110010100100110010100100%3C/text%3E%3Ctext x='0' y='200' font-family='monospace' font-size='10' fill='%231f5c12'%3E010110100110100110100110100110100110100110100110101%3C/text%3E%3Ctext x='0' y='220' font-family='monospace' font-size='10' fill='%231f5c12'%3E110011001100110011001100110011001100110011001100101%3C/text%3E%3Ctext x='0' y='240' font-family='monospace' font-size='10' fill='%231f5c12'%3E0101010110010100110010100110010100110010100110110%3C/text%3E%3Ctext x='0' y='260' font-family='monospace' font-size='10' fill='%231f5c12'%3E10010010100100110010100100110010100100110010100100%3C/text%3E%3Ctext x='0' y='280' font-family='monospace' font-size='10' fill='%231f5c12'%3E010110100110100110100110100110100110100110100110101%3C/text%3E%3Ctext x='0' y='300' font-family='monospace' font-size='10' fill='%231f5c12'%3E110011001100110011001100110011001100110011001100110011%3C/text%3E%3Ctext x='0' y='320' font-family='monospace' font-size='10' fill='%231f5c12'%3E10010010100100110010100100110010100100110010100100%3C/text%3E%3Ctext x='0' y='340' font-family='monospace' font-size='10' fill='%231f5c12'%3E010110100110100110100110100110100110100110100110101%3C/text%3E%3Ctext x='0' y='360' font-family='monospace' font-size='10' fill='%231f5c12'%3E10010010100100110010100100110010100100110010100100%3C/text%3E%3Ctext x='0' y='380' font-family='monospace' font-size='10' fill='%231f5c12'%3E0101010110010100110010100110010100110010100110110110%3C/text%3E%3Ctext x='0' y='400' font-family='monospace' font-size='10' fill='%231f5c12'%3E110011001100110011001100110011001100110011001100110011011%3C/text%3E%3Ctext x='0' y='420' font-family='monospace' font-size='10' fill='%231f5c12'%3E10010010100100110010100100110010100100110010100100100%3C/text%3E%3C/svg%3E");
-            background-size: 25px 800px; /* Optimized height */
-            animation: fall 8s linear infinite; /* Slower duration for "up and down" effect */
+            text-shadow: 0 0 5px var(--terminal-green);
+            white-space: pre; /* Keeps formatting */
+            opacity: 0.6;
+            font-family: monospace;
+            top: -50%; /* Start half-way up negative space */
         }
 
         @keyframes fall {
-            0% { background-position-y: 0%; } /* Top */
-            50% { background-position-y: 100%; } /* Bottom */
-            100% { background-position-y: 0%; } /* Back to Top */
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50%); }
         }
-
-        /* Positioning columns on Left and Right Panes */
-        /* Left Side Columns */
-        .c1 { left: 2%; animation-delay: 0s; }
-        .c2 { left: 5%; animation-delay: 1.2s; }
-        .c3 { left: 8%; animation-delay: 2.5s; }
-        .c4 { left: 11%; animation-delay: 0.8s; }
-        .c5 { left: 14%; animation-delay: 1.5s; }
-        .c6 { left: 17%; animation-delay: 3.0s; }
-
-        /* Right Side Columns */
-        .c7 { right: 2%; animation-delay: 0.5s; }
-        .c8 { right: 5%; animation-delay: 1.7s; }
-        .c9 { right: 8%; animation-delay: 2.2s; }
-        .c10 { right: 11%; animation-delay: 3.5s; }
-        .c11 { right: 14%; animation-delay: 1.0s; }
-        .c12 { right: 17%; animation-delay: 2.8s; }
 
         /* --- CRT SCANLINES OVERLAY --- */
         .scanlines {
@@ -424,6 +408,16 @@
             margin-top: 15px;
             min-height: 100px;
         }
+        
+        .sql-input {
+            background: #111;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 5px;
+            width: 100%;
+            margin-bottom: 5px;
+            font-family: monospace;
+        }
 
         /* --- MOBILE NAVIGATION MENU --- */
         .mobile-menu {
@@ -539,19 +533,9 @@
 </head>
 <body>
 
-    <!-- MATRIX RAIN CONTAINER (Left and Right Panes) -->
-    <div class="matrix-container">
-        <!-- Left Side Columns -->
-        <div class="matrix-column c1"></div>
-        <div class="matrix-column c2"></div>
-        <div class="matrix-column c3"></div>
-        <div class="matrix-column c4"></div>
-        <div class="matrix-column c5"></div>
-        <div class="matrix-column c6"></div>
-        <div class="matrix-column c7"></div>
-        <div class="matrix-column c8"></div>
-        <div class="matrix-column c9"></div>
-        <div class="matrix-column c10"></div>
+    <!-- MATRIX RAIN CONTAINER (Populated by JS) -->
+    <div class="matrix-container" id="matrixContainer">
+        <!-- Columns generated via JS for streamlined zero/one content -->
     </div>
 
     <div class="scanlines"></div>
@@ -1016,6 +1000,67 @@
     </div>
 
     <script>
+        // --- STREAMLINED MATRIX PANE GENERATOR ---
+        // This replaces the need for PHP or hardcoded SVG strings.
+        // It generates pure 0s and 1s dynamically.
+        function initSidePanes() {
+            const container = document.getElementById('matrixContainer');
+            const lines = 100; // Lines of binary code per column
+            
+            // Helper to generate binary string
+            const generateBinary = () => {
+                let str = '';
+                for (let i = 0; i < lines; i++) {
+                    // Randomly choose 0 or 1
+                    str += Math.random() > 0.5 ? '1' : '0';
+                    str += '\n'; // Newline for vertical stacking
+                }
+                return str;
+            };
+
+            // Configuration for Left and Right Columns
+            // Matches original visual spacing: 2%, 5%, 8%, 11%, 14%
+            const leftOffsets = [2, 5, 8, 11, 14];
+            const rightOffsets = [2, 5, 8, 11, 14];
+            
+            // Animation speeds to stagger the movement (in seconds)
+            const speeds = [1, 2.5, 3, 1.5, 0.8, 2.2, 1.8, 2.7, 1.2, 3.2];
+
+            let speedIndex = 0;
+
+            // Create Left Columns
+            leftOffsets.forEach(offset => {
+                const col = document.createElement('div');
+                col.classList.add('matrix-column');
+                col.style.left = offset + '%';
+                col.style.animationName = 'fall';
+                col.style.animationIterationCount = 'infinite';
+                col.style.animationTimingFunction = 'linear';
+                col.style.animationDuration = speeds[speedIndex % speeds.length] + 's';
+                col.textContent = generateBinary();
+                container.appendChild(col);
+                speedIndex++;
+            });
+
+            // Create Right Columns
+            rightOffsets.forEach(offset => {
+                const col = document.createElement('div');
+                col.classList.add('matrix-column');
+                col.style.right = offset + '%';
+                col.style.animationName = 'fall';
+                col.style.animationIterationCount = 'infinite';
+                col.style.animationTimingFunction = 'linear';
+                // Use a different speed range mix for right side
+                col.style.animationDuration = speeds[(speedIndex + 2) % speeds.length] + 's';
+                col.textContent = generateBinary();
+                container.appendChild(col);
+                speedIndex++;
+            });
+        }
+
+        // Initialize the panes immediately
+        initSidePanes();
+
         // --- NETWORK TRAFFIC LOG SIMULATION (Interactive) ---
         const logMessages = [
             "[TCP] Handshake initiated...",
@@ -1206,7 +1251,7 @@
                     <h3>> INTERACTIVE SIMULATION</h3>
                     <p>Click the button below to simulate a login bypass attack.</p>
                     
-                    <div class="sql-input-group">
+                    <div style="margin-top: 15px;">
                         <input type="text" value="admin" disabled class="sql-input" id="sqlUser">
                         <input type="text" value="' OR '1'='1" disabled class="sql-input" id="sqlPass">
                     </div>
@@ -1305,7 +1350,7 @@
                     <h1>// FILE: SECURE_FINANCE.TXT</h1>
                 </div>
                 <div class="modal-body">
-                    <p><strong>HAMMING QUASI-CYCLIC KEM</h>
+                    <h3>HAMMING QUASI-CYCLIC KEM</h3>
                     <p>Recommended for hashing passwords.</p>
                     <h3>CURRENCY</h3>
                     <p><strong>Monero (XMR):</strong> Private by default.</p>
@@ -1360,7 +1405,7 @@
                     <p>We are living in a digital Panopticon. Governments and corporations collect data to predict behavior, squash dissent, and control populations.</p>
                     
                     <h3>> ORWELLIAN DYSTOPIA</h3>
-                    <p>The telescreens of 1984 are real. Your phone listens to you. Your TV listens to you. Your smart speaker listens to you. Your smart speaker listens to you.</p>
+                    <p>The telescreens of 1984 are real. Your phone listens to you. Your TV listens to you. Your smart speaker listens to you.</p>
                     
                     <h3>> THE END OF PRIVACY</h3>
                     <ul>
@@ -1381,7 +1426,7 @@
                     <h3>> IMPACT ON HEADLESS OPERATING SYSTEMS</h3>
                     <p>Headless OS (like servers) have no webcam, mouse, or screen to scan a user's face or movement. These laws effectively ban self-hosting and server administration by privacy advocates who cannot verify their identity in this way.</p>
                     
-                    <h3>> DESTRUCTION OF ANONYMITY</h>
+                    <h3>> DESTRUCTION OF ANONYMITY</h3>
                     <p>Mandatory ID verification creates a database of every internet user and every site they visit, ending anonymity forever. This is the death of the free web.</p>
                 </div>
             `,
@@ -1496,6 +1541,7 @@
                     <a href="#maker" onclick="closeAllModals()">MAKER</a>
                     <a href="#intel" onclick="closeAllModals()">INTEL</a>
                 </div>
+            `;
         }
 
         function simulateSqlInjection() {
@@ -1523,7 +1569,6 @@
             if (pageContent[pageKey]) {
                 contentContainer.innerHTML = pageContent[pageKey];
                 
-                // Inject Navigation into the Modal Header
                 const header = contentContainer.querySelector('.modal-header');
                 if(header) {
                     header.innerHTML += getModalNavHTML();
@@ -1549,7 +1594,6 @@
                 closeModal();
             }
         }
-
     </script>
 </body>
 </html>
