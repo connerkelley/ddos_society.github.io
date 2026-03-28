@@ -34,10 +34,29 @@
             overflow-x: hidden;
             font-size: 16px;
             padding-top: 60px;
-            padding-bottom: 160px; /* Space for network log */
+            padding-bottom: 160px;
             position: relative;
             z-index: 0;
             touch-action: manipulation;
+            min-height: 100vh;
+        }
+
+        /* --- SCIFI BINARY BACKGROUND --- */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* Binary pattern SVG */
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='5' y='10' font-family='monospace' font-size='10' fill='%231f5c12' opacity='0.4'%3E01011010%3C/text%3E%3Ctext x='5' y='25' font-family='monospace' font-size='10' fill='%231f5c12' opacity='0.4'%3E00110110%3C/text%3E%3Ctext x='5' y='40' font-family='monospace' font-size='10' fill='%231f5c12' opacity='0.4'%3E11001001%3C/text%3E%3C/svg%3E");
+            z-index: 0;
+            /* Mask: Black in center (where text is), Transparent on sides (where binary is) */
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 70%);
+            mask-image: radial-gradient(circle at center, black 40%, transparent 70%);
+            pointer-events: none;
+            background-size: 40px 40px;
         }
 
         /* --- CRT SCANLINES OVERLAY --- */
@@ -103,14 +122,14 @@
         nav ul {
             list-style: none;
             display: flex;
-            gap: 15px;
+            gap: 10px; /* Tighter gap to fit 9 items */
         }
 
         nav a {
             text-decoration: none;
             color: var(--terminal-green);
             font-weight: bold;
-            font-size: 0.8rem;
+            font-size: 0.7rem; /* Smaller font to fit links */
             text-transform: uppercase;
             cursor: pointer;
             z-index: 2001;
@@ -138,6 +157,11 @@
             padding: 20px;
             position: relative;
             z-index: 10; 
+            background-color: var(--bg-black); /* Opaque background to hide binary code in center */
+            min-height: 100vh;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8); /* Blend with binary background */
+            border-left: 1px solid rgba(57, 255, 20, 0.1);
+            border-right: 1px solid rgba(57, 255, 20, 0.1);
         }
 
         /* --- TYPOGRAPHY --- */
@@ -268,7 +292,7 @@
             margin-bottom: 8px;
         }
 
-        /* --- NETWORK TRAFFIC LOG (Interactive) --- */
+        /* --- NETWORK TRAFFIC LOG --- */
         .network-log {
             position: fixed;
             bottom: 0;
@@ -369,19 +393,6 @@
             color: var(--terminal-green);
             margin-top: 15px;
             min-height: 100px;
-        }
-        .sql-input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .sql-input {
-            background: #111;
-            border: 1px solid var(--terminal-green);
-            color: var(--terminal-green);
-            padding: 5px;
-            font-family: monospace;
-            flex-grow: 1;
         }
 
         /* --- MOBILE NAVIGATION MENU --- */
@@ -491,7 +502,7 @@
                 display: flex;
             }
             .network-log {
-                display: none; /* Hide log on mobile to save screen space */
+                display: none; /* Hide log on mobile */
             }
         }
     </style>
@@ -506,8 +517,12 @@
         <ul>
             <li><a href="#" onclick="closeAllModals()">HOME</a></li>
             <li><a href="#hardware" onclick="closeAllModals()">HARDWARE</a></li>
-            <li><a href="#communication" onclick="closeAllModals()">COMMS</a></li>
+            <li><a href="#comms" onclick="closeAllModals()">COMMS</a></li>
+            <li><a href="#networks" onclick="closeAllModals()">NETWORKS</a></li>
             <li><a href="#tools" onclick="closeAllModals()">TOOLS</a></li>
+            <li><a href="#cause" onclick="closeAllModals()">CAUSE</a></li>
+            <li><a href="#defense" onclick="closeAllModals()">DEFENSE</a></li>
+            <li><a href="#maker" onclick="closeAllModals()">MAKER</a></li>
             <li><a href="#intel" onclick="closeAllModals()">INTEL</a></li>
         </ul>
 
@@ -517,8 +532,12 @@
     <div class="mobile-menu" id="mobileMenu">
         <a href="#" onclick="closeAllModals(); toggleMenu()">HOME</a>
         <a href="#hardware" onclick="closeAllModals(); toggleMenu()">HARDWARE</a>
-        <a href="#communication" onclick="closeAllModals(); toggleMenu()">COMMS</a>
+        <a href="#comms" onclick="closeAllModals(); toggleMenu()">COMMS</a>
+        <a href="#networks" onclick="closeAllModals(); toggleMenu()">NETWORKS</a>
         <a href="#tools" onclick="closeAllModals(); toggleMenu()">TOOLS</a>
+        <a href="#cause" onclick="closeAllModals(); toggleMenu()">CAUSE</a>
+        <a href="#defense" onclick="closeAllModals(); toggleMenu()">DEFENSE</a>
+        <a href="#maker" onclick="closeAllModals(); toggleMenu()">MAKER</a>
         <a href="#intel" onclick="closeAllModals(); toggleMenu()">INTEL</a>
     </div>
 
@@ -531,10 +550,9 @@
         </div>
     </div>
 
-    <!-- LIVE NETWORK TRAFFIC LOG (Interactive Element) -->
+    <!-- LIVE NETWORK TRAFFIC LOG -->
     <div class="network-log" id="networkLog">
         <div style="border-bottom: 1px dashed var(--terminal-dim); margin-bottom: 5px; font-weight: bold;">NET_TRAFFIC_V4</div>
-        <!-- Logs injected via JS -->
     </div>
 
     <div class="container">
@@ -619,7 +637,7 @@
                 </div>
             </section>
 
-            <section id="communication">
+            <section id="comms">
                 <h2>// 3. SECURE COMMUNICATIONS</h2>
                 <div class="grid">
                     <article class="card">
@@ -758,8 +776,137 @@
                 </div>
             </section>
 
+            <section id="cause">
+                <h2>// 6. THE CAUSE</h2>
+                <p>Human rights and the fight against the surveillance state.</p>
+                <div class="grid">
+                    <article class="card">
+                        <div>
+                            <h3>HUMAN RIGHTS ACTIVISM</h3>
+                            <p>Fighting for digital freedom and privacy rights globally.</p>
+                            <ul>
+                                <li><strong>Amnesty International:</strong> Global movement against human rights abuses.</li>
+                                <li><strong>Edward Snowden:</strong> Whistleblower who exposed the PRISM program.</li>
+                            </ul>
+                        </div>
+                        <a href="https://www.amnesty.org/en/" target="_blank" class="btn btn-sm">VISIT AMNESTY</a>
+                    </article>
+
+                    <article class="card">
+                        <div>
+                            <h3>MASS SURVEILLANCE</h3>
+                            <p>The dangers of an Orwellian dystopia created by unmonitored data collection.</p>
+                            <ul>
+                                <li>The Panopticon Effect.</li>
+                                <li>Predictive Policing algorithms.</li>
+                                <li>Chilling effect on free speech.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('surveillance')">[ANALYZE]</button>
+                    </article>
+
+                    <article class="card">
+                        <div>
+                            <h3>AGE VERIFICATION LAWS</h3>
+                            <p>Denouncing recent laws requiring ID for internet access.</p>
+                            <ul>
+                                <li>Breaks headless OS (servers).</li>
+                                <li>Mandatory ID databases.</li>
+                                <li>End of anonymity.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('agelaws')">[PROTEST]</button>
+                    </article>
+                </div>
+            </section>
+
+            <section id="defense">
+                <h2>// 7. NETWORK DEFENSE</h2>
+                <p>Optimizing router privacy and securing connections.</p>
+                <div class="grid">
+                    <article class="card">
+                        <div>
+                            <h3>ROUTER PRIVACY (PFSENSE)</h3>
+                            <p>Hardening your perimeter using Type 1 Hypervisors and professional firewalls.</p>
+                            <ul>
+                                <li><strong>pfsense:</strong> Open-source firewall/router.</li>
+                                <li>Type 1 Hypervisor isolation.</li>
+                                <li>Suricata & Snort IDS.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('pfsense')">[CONFIGURE]</button>
+                    </article>
+
+                    <article class="card">
+                        <div>
+                            <h3>PRIVACY FOCUSED VPNs</h3>
+                            <p>Services that prioritize no-logs policies and jurisdiction safety.</p>
+                            <ul>
+                                <li><strong>Mullvad:</strong> No email required, crypto-only, Swedish jurisdiction.</li>
+                                <li><strong>Proton VPN:</strong> Swiss-based, Secure Core architecture.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('vpns')">[DEPLOY]</button>
+                    </article>
+                </div>
+            </section>
+
+            <section id="maker">
+                <h2>// 8. MAKER CULTURE</h2>
+                <p>Utilizing Raspberry Pis for privacy, security, and automation.</p>
+                <div class="grid">
+                    <article class="card">
+                        <div>
+                            <h3>AD GUARD HOME / PI-HOLE</h3>
+                            <p>Network-wide ad-blocking and DNS sinkholes.</p>
+                            <ul>
+                                <li>Block ads and trackers for all devices.</li>
+                                <li>Block telemetry on smart TVs.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('dns')">[DEPLOY]</button>
+                    </article>
+
+                    <article class="card">
+                        <div>
+                            <h3>PIVPN</h3>
+                            <p>Host your own secure VPN server.</p>
+                            <ul>
+                                <li>Access home network securely.</li>
+                                <li>Bypass geo-restrictions.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('pivpn')">[SETUP]</button>
+                    </article>
+
+                    <article class="card">
+                        <div>
+                            <h3>HOME ASSISTANT</h3>
+                            <p>Local smart home hub. Control your house without sending data to the cloud.</p>
+                            <ul>
+                                <li>Automate lights and temperature.</li>
+                                <li>Privacy-focused automation.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('homeassistant')">[AUTOMATE]</button>
+                    </article>
+                    
+                    <article class="card">
+                        <div>
+                            <h3>RETROPIE</h3>
+                            <p>Turn your Pi into a retro gaming console.</p>
+                            <ul>
+                                <li>Emulates NES, SNES, PlayStation, etc.</li>
+                                <li>Offline gaming.</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm" onclick="openPage('retropie')">[PLAY]</button>
+                    </article>
+                </div>
+            </section>
+
             <section id="intel">
-                <h2>// 6. INTELLIGENCE SOURCES</h2>
+                <h2>// 9. INTELLIGENCE SOURCES</h2>
                 <p>Curated intelligence channels for the resistance.</p>
                 <div class="grid">
                     <article class="card yt-card">
@@ -848,12 +995,10 @@
             const div = document.createElement('div');
             div.className = 'log-entry';
             
-            // Randomly color critical warnings
             if (Math.random() > 0.8) {
                 div.className += ' log-warning';
             }
             
-            // Add timestamp
             const now = new Date();
             const timeString = now.getHours().toString().padStart(2, '0') + ":" + 
                                now.getMinutes().toString().padStart(2, '0') + ":" + 
@@ -862,15 +1007,13 @@
             div.textContent = `[${timeString}] ${randomMsg}`;
             logContainer.appendChild(div);
             
-            // Keep only last 8 logs
             if (logContainer.children.length > 9) {
-                logContainer.removeChild(logContainer.children[1]); // Keep the title
+                logContainer.removeChild(logContainer.children[1]); 
             }
         }
 
-        setInterval(addNetworkLog, 2500); // New log every 2.5 seconds
+        setInterval(addNetworkLog, 2500); 
 
-        // --- MOBILE MENU TOGGLE ---
         function toggleMenu() {
             const menu = document.getElementById('mobileMenu');
             menu.classList.toggle('active');
@@ -926,7 +1069,6 @@
 
         function generateRandomQuery() {
             const type = Math.random();
-            // More logic for better random combinations
             const action = ["search for", "find", "lookup", "query", "explore", "investigate"][Math.floor(Math.random() * 6)];
             const subject = subjects[Math.floor(Math.random() * subjects.length)];
             const noise = gibberish[Math.floor(Math.random() * gibberish.length)];
@@ -1163,6 +1305,135 @@
                     <h3>> ACTION</h3>
                     <p>Create a free account at tryhackme.com and start the "Pre-Security" path today.</p>
                 </div>
+            `,
+            surveillance: `
+                <div class="modal-header">
+                    <h1>// FILE: MASS_SURVEILLANCE_ANALYSIS.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p><strong>THREAT LEVEL:</strong> EXTREME</p>
+                    <p>We are living in a digital Panopticon. Governments and corporations collect data to predict behavior, squash dissent, and control populations.</p>
+                    
+                    <h3>> ORWELLIAN DYSTOPIA</h3>
+                    <p>The telescreens of 1984 are real. Your phone listens to you. Your TV listens to you. Your smart speaker listens to you.</p>
+                    
+                    <h3>> THE END OF PRIVACY</h3>
+                    <ul>
+                        <li><strong>Predictive Policing:</strong> Algorithms guess crimes before they happen.</li>
+                        <li><strong>Social Credit Scores:</strong> Your access to services depends on your compliance.</li>
+                        <li><strong>Chilling Effects:</strong> People self-censor knowing they are watched.</li>
+                    </ul>
+                </div>
+            `,
+            agelaws: `
+                <div class="modal-header">
+                    <h1>// FILE: AGE_VERIFICATION_PROTEST.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p><strong>STATUS:</strong> CRITICAL FAILURE</p>
+                    <p>We strongly denounce laws requiring ID verification for internet access.</p>
+                    
+                    <h3>> IMPACT ON HEADLESS OPERATING SYSTEMS</h3>
+                    <p>Headless OS (like servers) have no webcam, mouse, or screen to scan a user's face or movement. These laws effectively ban self-hosting and server administration by privacy advocates who cannot verify their identity in this way.</p>
+                    
+                    <h3>> DESTRUCTION OF ANONYMITY</h3>
+                    <p>Mandatory ID verification creates a database of every internet user and every site they visit, ending anonymity forever. This is the death of the free web.</p>
+                </div>
+            `,
+            pfsense: `
+                <div class="modal-header">
+                    <h1>// FILE: PFSENSE_HYPERVISOR_SETUP.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p><strong>SYSTEM:</strong> NETWORK DEFENSE</p>
+                    <p>pfsense is the gold standard for open-source routing. To maximize security, run it on a Type 1 Hypervisor (like Proxmox or ESXi).</p>
+                    
+                    <h3>> TYPE 1 HYPERVISOR BENEFITS</h3>
+                    <ul>
+                        <li><strong>Hardware Isolation:</strong> The firewall is completely isolated from the host OS.</li>
+                        <li><strong>Snapshots:</strong> You can "freeze" the firewall state. If you get hacked or brick it, revert to a snapshot instantly.</li>
+                        <li><strong>Transparent Bridge:</strong> Acts as a layer 2 bridge for other VMs.</li>
+                    </ul>
+                    
+                    <div class="code-block">
+                        WAN -- [HOST OS -- HYPERVISOR] -- [PFSENSE VM] -- LAN
+                    </div>
+                </div>
+            `,
+            vpns: `
+                <div class="modal-header">
+                    <h1>// FILE: PRIVACY_VPN_MANIFEST.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p>Not all VPNs are created equal. Only use audited, privacy-focused providers.</p>
+                    
+                    <h3>> MULLVAD VPN</h3>
+                    <p>Based in Sweden. No email required. Cash/Crypto accepted. WireGuard protocol. Best in class for anonymity.</p>
+                    
+                    <h3>> PROTON VPN</h3>
+                    <p>Based in Switzerland. "Secure Core" architecture routes traffic through secure servers before leaving Switzerland. User-friendly, good for beginners.</p>
+                </div>
+            `,
+            dns: `
+                <div class="modal-header">
+                    <h1>// FILE: DNS_SINKHOLE_MANIFEST.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p><strong>PROJECT:</strong> ADGUARD HOME / PI-HOLE</p>
+                    <p>Turn your Raspberry Pi into a network-wide ad blocker.</p>
+                    
+                    <h3>> BENEFITS</h3>
+                    <ul>
+                        <li>Block ads on smart TVs and phones.</li>
+                        <li>Block telemetry domains.</li>
+                        <li>Speed up internet by not loading trackers.</li>
+                    </ul>
+                </div>
+            `,
+            pivpn: `
+                <div class="modal-header">
+                    <h1>// FILE: PIVPN_DEPLOYMENT.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p><strong>PROJECT:</strong> PIVPN</p>
+                    <p>Host your own WireGuard VPN server on a Raspberry Pi.</p>
+                    
+                    <h3>> USE CASES</h3>
+                    <ul>
+                        <li><strong>Remote Access:</strong> Access your home network securely from coffee shops.</li>
+                        <li><strong>Bypass Geoblocking:</strong> Access content restricted to your home country while abroad.</li>
+                    </ul>
+                </div>
+            `,
+            homeassistant: `
+                <div class="modal-header">
+                    <h1>// FILE: SMART_HOME_AUTOMATION.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p><strong>SYSTEM:</strong> HOME ASSISTANT</p>
+                    <p>Control your home locally. No data sent to Amazon or Google.</p>
+                    
+                    <h3>> AUTOMATIONS</h3>
+                    <ul>
+                        <li>Automate lights based on sunrise/sunset.</li>
+                        <li>Security: Flash lights if door opens at night.</li>
+                        <li>Climate control: Adjust thermostat based on presence.</li>
+                    </ul>
+                </div>
+            `,
+            retropie: `
+                <div class="modal-header">
+                    <h1>// FILE: RETRO_GAMING_CONSOLE.TXT</h1>
+                </div>
+                <div class="modal-body">
+                    <p><strong>SYSTEM:</strong> RETROPIE</p>
+                    <p>Turn your Pi into a retro gaming console. Play thousands of games from the 70s, 80s, 90s.</p>
+                    <ul>
+                        <li>Supports PS1, NES, SNES, Sega Genesis, arcade cabinets.</li>
+                        <li>USB controller support.</li>
+                        <li>Offline gaming (no internet required).</li>
+                    </ul>
+                </div>
             `
         };
 
@@ -1172,14 +1443,17 @@
                 <div class="modal-nav">
                     <a href="#" onclick="closeAllModals()">HOME</a>
                     <a href="#hardware" onclick="closeAllModals()">HARDWARE</a>
-                    <a href="#communication" onclick="closeAllModals()">COMMS</a>
+                    <a href="#comms" onclick="closeAllModals()">COMMS</a>
+                    <a href="#networks" onclick="closeAllModals()">NETWORKS</a>
                     <a href="#tools" onclick="closeAllModals()">TOOLS</a>
+                    <a href="#cause" onclick="closeAllModals()">CAUSE</a>
+                    <a href="#defense" onclick="closeAllModals()">DEFENSE</a>
+                    <a href="#maker" onclick="closeAllModals()">MAKER</a>
                     <a href="#intel" onclick="closeAllModals()">INTEL</a>
                 </div>
             `;
         }
 
-        // --- SQL INJECTION SIMULATION FUNCTION ---
         function simulateSqlInjection() {
             const output = document.getElementById('sqlOutput');
             output.innerHTML = "> Connecting to database...<br>";
@@ -1225,7 +1499,6 @@
             closeModal();
         }
 
-        // Close modal if user clicks outside content
         window.onclick = function(event) {
             const modal = document.getElementById('dataModal');
             if (event.target == modal) {
